@@ -7,6 +7,9 @@ x-superset-depends-on: &superset-depends-on
 x-superset-volumes: &superset-volumes
   # Mount our custom config into the container
   - ./config:/app/pythonpath
+x-superset-environment: &superset-environment
+  SUPERSET_SECRET_KEY: "TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345"
+  SUPERSET_CONFIG_PATH: "/app/pythonpath/superset_config.py"
 
 services:
   redis:
@@ -38,8 +41,8 @@ services:
     depends_on: *superset-depends-on
     volumes: *superset-volumes
     environment:
-      - SUPERSET_SECRET_KEY=TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345
-      - SUPERSET_LOAD_EXAMPLES=0
+      <<: *superset-environment
+      SUPERSET_LOAD_EXAMPLES: 0
 
   superset-init:
     image: *superset-image
@@ -54,7 +57,7 @@ services:
     depends_on: *superset-depends-on
     volumes: *superset-volumes
     environment:
-      - SUPERSET_SECRET_KEY=TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345
+      <<: *superset-environment
 
   superset-worker:
     image: *superset-image
@@ -64,7 +67,7 @@ services:
     depends_on: *superset-depends-on
     volumes: *superset-volumes
     environment:
-      - SUPERSET_SECRET_KEY=TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345
+      <<: *superset-environment
 
   superset-worker-beat:
     image: *superset-image
@@ -74,7 +77,7 @@ services:
     depends_on: *superset-depends-on
     volumes: *superset-volumes
     environment:
-      - SUPERSET_SECRET_KEY=TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345
+      <<: *superset-environment
 
 volumes:
   redis_data:
