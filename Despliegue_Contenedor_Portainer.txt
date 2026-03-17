@@ -28,7 +28,7 @@ está optimizado para leer tu código directamente desde GitHub.
     *   Ponle un nombre a tu Stack (ej: `dashinco-superset`).
     *   En la sección "Build method", selecciona **"Repository"**.
     *   Llena los campos:
-        *   **Repository URL:** `https://github.com/sebastianherrara91-bot/Stremlit_Postgre.git` (Asegúrate de que tus archivos creados hoy estén subidos (pushed) en la rama correspondiente de este repositorio).
+        *   **Repository URL:** `https://github.com/sebastianherrara91-bot/DashInco_Superset.git` (Asegúrate de que tus archivos creados hoy estén subidos (pushed) en la rama correspondiente de este repositorio).
         *   **Repository reference:** `refs/heads/main` (O la rama que estés usando).
         *   **Compose path:** `docker-compose.yml`
     *   *Nota Opcional:* Como el archivo `docker-compose.yml` cuenta con el mapeo de `./superset_config.py`, al hacerlo desde Repositorio en Portainer se montará todo adecuadamente en automático sin tener que usar consolas o scripts.

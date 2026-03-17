@@ -19,7 +19,7 @@ fi
 echo "[1/2] Preparando carpeta del proyecto vía CLI..."
 if [ ! -d "/opt/DashInco" ]; then
     cd /opt
-    git clone https://github.com/sebastianherrara91-bot/Stremlit_Postgre.git DashInco
+    git clone https://github.com/sebastianherrara91-bot/DashInco_Superset.git DashInco
 fi
 cd /opt/DashInco
 
