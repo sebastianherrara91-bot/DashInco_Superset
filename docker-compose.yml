@@ -2,50 +2,16 @@ version: '3.8'
 
 x-superset-image: &superset-image apache/superset:latest-dev
 x-superset-depends-on: &superset-depends-on
-  superset-config-writer:
-    condition: service_completed_successfully
-  db:
-    condition: service_started
-  redis:
-    condition: service_started
-    
+  - db
+  - redis
 x-superset-volumes: &superset-volumes
-  - superset_config_vol:/app/pythonpath
+  # Mount our custom config into the container
+  - ./config:/app/pythonpath
 x-superset-environment: &superset-environment
   SUPERSET_SECRET_KEY: "TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345"
   SUPERSET_CONFIG_PATH: "/app/pythonpath/superset_config.py"
 
 services:
-  superset-config-writer:
-    image: alpine:latest
-    container_name: superset_config_writer
-    volumes: *superset-volumes
-    command: >
-      sh -c 'cat << "EOF" > /app/pythonpath/superset_config.py
-      import os
-      from celery.schedules import crontab
-      SECRET_KEY = os.getenv("SUPERSET_SECRET_KEY", "TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345")
-      SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://superset:superset_password@db:5432/superset"
-      class CeleryConfig:
-          broker_url = "redis://redis:6379/0"
-          imports = ("superset.sql_lab",)
-          result_backend = "redis://redis:6379/0"
-          worker_prefetch_multiplier = 1
-          task_acks_late = False
-          beat_schedule = {
-              "reports.scheduler": {"task": "reports.scheduler", "schedule": crontab(minute="*", hour="*")},
-              "reports.prune_log": {"task": "reports.prune_log", "schedule": crontab(minute=10, hour=0)},
-          }
-      CELERY_CONFIG = CeleryConfig
-      DATA_CACHE_CONFIG = {"CACHE_TYPE": "RedisCache", "CACHE_DEFAULT_TIMEOUT": 86400, "CACHE_KEY_PREFIX": "sup_", "CACHE_REDIS_URL": "redis://redis:6379/1"}
-      FILTER_STATE_CACHE_CONFIG = {"CACHE_TYPE": "RedisCache", "CACHE_DEFAULT_TIMEOUT": 86400, "CACHE_KEY_PREFIX": "sup_filter_", "CACHE_REDIS_URL": "redis://redis:6379/2"}
-      EXPLORE_FORM_DATA_CACHE_CONFIG = {"CACHE_TYPE": "RedisCache", "CACHE_DEFAULT_TIMEOUT": 86400, "CACHE_KEY_PREFIX": "sup_explore_", "CACHE_REDIS_URL": "redis://redis:6379/3"}
-      FEATURE_FLAGS = {"DASHBOARD_CROSS_FILTERS": True, "ENABLE_TEMPLATE_PROCESSING": True, "DRILL_TO_DETAIL": True, "HORIZONTAL_FILTER_BAR": True}
-      SQLLAB_TIMEOUT = 300
-      SUPERSET_WEBSERVER_TIMEOUT = 300
-      EOF
-      chmod 666 /app/pythonpath/superset_config.py'
-
   redis:
     image: redis:7
     container_name: superset_redis
@@ -116,4 +82,3 @@ services:
 volumes:
   redis_data:
   db_data:
-  superset_config_vol:
