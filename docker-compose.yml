@@ -1,5 +1,3 @@
-version: '3.8'
-
 x-superset-image: &superset-image apache/superset:latest-dev
 x-superset-depends-on: &superset-depends-on
   db:
