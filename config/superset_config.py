@@ -6,13 +6,13 @@ from celery.schedules import crontab
 SECRET_KEY = os.getenv("SUPERSET_SECRET_KEY", "DEVELOPMENT_SECRET_KEY_CHANGE_ME")
 
 # Conexion a la BD de Metadatos de Superset (El contenedor 'db' de Postgres 18)
-SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://superset:superset_password@db:5432/superset'
+SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://superset:superset_password@superset_db:5432/superset'
 
 # Habilitar opciones de Redis para Celery (Workers)
 class CeleryConfig:
-    broker_url = "redis://redis:6379/0"
+    broker_url = "redis://superset_redis:6379/0"
     imports = ("superset.sql_lab",)
-    result_backend = "redis://redis:6379/0"
+    result_backend = "redis://superset_redis:6379/0"
     worker_prefetch_multiplier = 1
     task_acks_late = False
     beat_schedule = {
@@ -33,7 +33,7 @@ DATA_CACHE_CONFIG = {
     'CACHE_TYPE': 'RedisCache',
     'CACHE_DEFAULT_TIMEOUT': 86400, # 1 dia de cache por defecto
     'CACHE_KEY_PREFIX': 'superset_data_cache_',
-    'CACHE_REDIS_URL': 'redis://redis:6379/1'
+    'CACHE_REDIS_URL': 'redis://superset_redis:6379/1'
 }
 
 # Configuracion de la Cache de Componentes del Dashboard y Filtros
@@ -41,14 +41,14 @@ FILTER_STATE_CACHE_CONFIG = {
     'CACHE_TYPE': 'RedisCache',
     'CACHE_DEFAULT_TIMEOUT': 86400,
     'CACHE_KEY_PREFIX': 'superset_filter_cache_',
-    'CACHE_REDIS_URL': 'redis://redis:6379/2'
+    'CACHE_REDIS_URL': 'redis://superset_redis:6379/2'
 }
 
 EXPLORE_FORM_DATA_CACHE_CONFIG = {
     'CACHE_TYPE': 'RedisCache',
     'CACHE_DEFAULT_TIMEOUT': 86400,
     'CACHE_KEY_PREFIX': 'superset_explore_cache_',
-    'CACHE_REDIS_URL': 'redis://redis:6379/3'
+    'CACHE_REDIS_URL': 'redis://superset_redis:6379/3'
 }
 
 # Feature Flags
