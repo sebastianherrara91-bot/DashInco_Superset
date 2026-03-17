@@ -2,8 +2,10 @@ version: '3.8'
 
 x-superset-image: &superset-image apache/superset:latest-dev
 x-superset-depends-on: &superset-depends-on
-  - db
-  - redis
+  db:
+    condition: service_healthy
+  redis:
+    condition: service_started
 x-superset-volumes: &superset-volumes
   # Mount our custom config into the container
   - ./config:/app/pythonpath
@@ -22,13 +24,18 @@ services:
       - redis_data:/data
 
   db:
-    image: postgres:18
+    image: postgres:16
     container_name: superset_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: superset
       POSTGRES_PASSWORD: superset_password
       POSTGRES_DB: superset
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U superset -d superset"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     volumes:
       - db_data:/var/lib/postgresql/data
 
@@ -49,7 +56,6 @@ services:
     container_name: superset_init
     command: >
       /bin/sh -c "
-      sleep 15 &&
       superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin &&
       superset db upgrade &&
       superset init
