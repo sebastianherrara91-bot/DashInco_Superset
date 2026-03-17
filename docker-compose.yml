@@ -1,0 +1,80 @@
+version: '3.8'
+
+x-superset-image: &superset-image apache/superset:latest-dev
+x-superset-depends-on: &superset-depends-on
+  - db
+  - redis
+x-superset-volumes: &superset-volumes
+  # Mount our custom config into the container
+  - ./superset_config.py:/app/pythonpath/superset_config.py
+
+services:
+  redis:
+    image: redis:7
+    container_name: superset_redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+
+  db:
+    image: postgres:18
+    container_name: superset_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: superset_password
+      POSTGRES_DB: superset
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  superset:
+    image: *superset-image
+    container_name: superset_app
+    restart: unless-stopped
+    ports:
+      - "8088:8088"
+    depends_on: *superset-depends-on
+    volumes: *superset-volumes
+    environment:
+      - SUPERSET_SECRET_KEY=TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345
+      - SUPERSET_LOAD_EXAMPLES=0
+
+  superset-init:
+    image: *superset-image
+    container_name: superset_init
+    command: >
+      /bin/sh -c "
+      superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin &&
+      superset db upgrade &&
+      superset init
+      "
+    depends_on: *superset-depends-on
+    volumes: *superset-volumes
+    environment:
+      - SUPERSET_SECRET_KEY=TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345
+
+  superset-worker:
+    image: *superset-image
+    container_name: superset_worker
+    command: ["celery", "--app=superset.tasks.celery_app:app", "worker", "-O", "fair", "-l", "INFO"]
+    restart: unless-stopped
+    depends_on: *superset-depends-on
+    volumes: *superset-volumes
+    environment:
+      - SUPERSET_SECRET_KEY=TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345
+
+  superset-worker-beat:
+    image: *superset-image
+    container_name: superset_worker_beat
+    command: ["celery", "--app=superset.tasks.celery_app:app", "beat"]
+    restart: unless-stopped
+    depends_on: *superset-depends-on
+    volumes: *superset-volumes
+    environment:
+      - SUPERSET_SECRET_KEY=TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345
+
+volumes:
+  redis_data:
+  db_data:

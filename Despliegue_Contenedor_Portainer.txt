@@ -1,0 +1,82 @@
+==================================================================================
+Guía de Despliegue en Portainer (Proxmox Docker VM Helper Script)
+==================================================================================
+
+OBJETIVO: Instalar Apache Superset, Redis y PostgreSQL aprovechando la plataforma de 
+Portainer que se instaló previamente mediante el Helper Script de Proxmox.
+
+Esta nueva arquitectura simplifica completamente el despliegue porque Portainer
+está optimizado para leer tu código directamente desde GitHub.
+
+---
+### Parte 1: Creación del Stack en Portainer
+---
+
+1.  **Ingresar a Portainer:**
+    *   Abre tu navegador e ingresa a la IP de tu nueva máquina Docker en el puerto de Portainer: 
+        `https://<IP_DE_LA_MAQUINA_DOCKER>:9443` (o por HTTP en el `9000` si así lo configuraste).
+    *   Ingresa con las credenciales que creaste en la instalación.
+
+2.  **Selecciona tu Entorno (Environment):**
+    *   Normalmente aparece un entorno local activo llamado `local` o `primary`. Haz clic en él.
+
+3.  **Ir a "Stacks":**
+    *   En el menú izquierdo, haz clic en **"Stacks"**.
+    *   Presiona el botón azul en la esquina superior derecha: **"+ Add stack"**.
+
+4.  **Configuración del Stack desde Git:**
+    *   Ponle un nombre a tu Stack (ej: `dashinco-superset`).
+    *   En la sección "Build method", selecciona **"Repository"**.
+    *   Llena los campos:
+        *   **Repository URL:** `https://github.com/sebastianherrara91-bot/Stremlit_Postgre.git` (Asegúrate de que tus archivos creados hoy estén subidos (pushed) en la rama correspondiente de este repositorio).
+        *   **Repository reference:** `refs/heads/main` (O la rama que estés usando).
+        *   **Compose path:** `docker-compose.yml`
+    *   *Nota Opcional:* Como el archivo `docker-compose.yml` cuenta con el mapeo de `./superset_config.py`, al hacerlo desde Repositorio en Portainer se montará todo adecuadamente en automático sin tener que usar consolas o scripts.
+
+5.  **Despliegue (Deploy):**
+    *   Ve al fondo y dale clic al botón **"Deploy the stack"**.
+    *   Portainer comenzará a descargar y construir las imágenes (PostgreSQL, Redis, Superset) y aplicará las configuraciones nativas. Esto puede demorar varios minutos.
+    *   Cuando termine, tu Stack aparecerá como Activo.
+
+---
+### Parte 2: Validación e Inicialización del Usuario Admin
+---
+
+Aunque el Stack se lanza, Superset necesita unos segundos/minutos para crear la base
+de datos interna ejecutando el contenedor "superset-init".
+
+1.  **Ver su progreso:**
+    *   En Portainer, ve a **Containers**.
+    *   Busca uno llamado algo como `dashinco-superset_superset-init`.
+    *   Haz clic en el icono de **"Logs"** (símbolo de lista/documento). Opcionalmente puedes usar la consola de Proxmox en la VM para escribir: `docker logs -f superset_init`.
+    *   Cuando en los logs veas que las migraciones terminan sin error, la inicialización fue un éxito.
+
+---
+### Parte 3: Acceso Inicial e Integración
+---
+
+1.  **Entrar a Superset:**
+    *   En el navegador: `http://<IP_DE_LA_MAQUINA_DOCKER>:8088`.
+    *   **Usuario:** `admin` | **Contraseña:** `admin`. 
+
+2.  **Conexión a DWH_INCO:**
+    *   Haz clic en **Settings** (Rueda dentada, arriba a la derecha).
+    *   Selecciona **Database Connections** y luego el botón **+ Database**.
+    *   Selecciona PostgreSQL.
+    *   Activar / Pegar el URI (Sustituye por credenciales del `.env`):
+        `postgresql://user_conect:P3p3Inc001@186.31.65.250:5432/DWH_INCO`
+    *   Prueba y Guarda.
+
+---
+### Parte 4: Próximos pasos de Desarrollo (Fase SQL Lab)
+---
+
+Superset ya no tomará los archivos `.sql` desde tu repositorio. Deberás "Enseñarles" los queries a la herramienta una única vez:
+
+1.  **Crear Virtual Datasets:**
+    *   Ve a **SQL > SQL Lab**.
+    *   Copia y Pega un Query (ej. `Ventas_Sem_Ano.sql`).
+    *   **Importante:** Debes borrar todas las cláusulas de Python como `:fecha_fin` o `BETWEEN :fecha_inicio AND :fecha_fin`. Como usarás los "**Dashboard Filters**", Superset añade esas reglas sobre la marcha de forma invisible hacia SQL. (Veremos el detalle de esto en los próximos pasos a petición tuya).
+    *   Haz clic en **Save Dataset**. Tu SQL quedará indexado para poder crear dashboards visuales usando Redis.
+
+¡Felicidades, la infraestructura ha quedado mucho más elegante y desacoplada al usar Portainer!

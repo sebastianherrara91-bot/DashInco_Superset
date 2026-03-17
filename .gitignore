@@ -1,0 +1,11 @@
+.env
+.DS_Store
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+logs/
+*.log
+logs_rendimiento/
+logs_rendimiento/*.log
