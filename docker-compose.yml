@@ -4,9 +4,9 @@ x-superset-image: &superset-image apache/superset:latest-dev
 x-superset-depends-on: &superset-depends-on
   - db
   - redis
-x-superset-volumes: &superset-volumes
-  # Mount our custom config into the container
-  - ./config:/app/pythonpath
+x-superset-configs: &superset-configs
+  - source: superset_config
+    target: /app/pythonpath/superset_config.py
 x-superset-environment: &superset-environment
   SUPERSET_SECRET_KEY: "TU_SECRET_KEY_PRODUCCION_CAMBIAR_ESTO_12345"
   SUPERSET_CONFIG_PATH: "/app/pythonpath/superset_config.py"
@@ -39,7 +39,7 @@ services:
     ports:
       - "8088:8088"
     depends_on: *superset-depends-on
-    volumes: *superset-volumes
+    configs: *superset-configs
     environment:
       <<: *superset-environment
       SUPERSET_LOAD_EXAMPLES: 0
@@ -55,7 +55,7 @@ services:
       superset init
       "
     depends_on: *superset-depends-on
-    volumes: *superset-volumes
+    configs: *superset-configs
     environment:
       <<: *superset-environment
 
@@ -65,7 +65,7 @@ services:
     command: ["celery", "--app=superset.tasks.celery_app:app", "worker", "-O", "fair", "-l", "INFO"]
     restart: unless-stopped
     depends_on: *superset-depends-on
-    volumes: *superset-volumes
+    configs: *superset-configs
     environment:
       <<: *superset-environment
 
@@ -75,10 +75,14 @@ services:
     command: ["celery", "--app=superset.tasks.celery_app:app", "beat"]
     restart: unless-stopped
     depends_on: *superset-depends-on
-    volumes: *superset-volumes
+    configs: *superset-configs
     environment:
       <<: *superset-environment
 
 volumes:
   redis_data:
   db_data:
+
+configs:
+  superset_config:
+    file: ./config/superset_config.py
