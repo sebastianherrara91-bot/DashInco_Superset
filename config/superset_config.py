@@ -2,10 +2,10 @@ import os
 from datetime import timedelta
 from celery.schedules import crontab
 
-# ConfiguraciÃ³n de Secret Key (Se espera que se lea desde una variable de entorno en prod)
+# Configuracion de Secret Key (Se espera que se lea desde una variable de entorno en prod)
 SECRET_KEY = os.getenv("SUPERSET_SECRET_KEY", "DEVELOPMENT_SECRET_KEY_CHANGE_ME")
 
-# ConexiÃ³n a la BD de Metadatos de Superset (El contenedor 'db' de Postgres 15)
+# Conexion a la BD de Metadatos de Superset (El contenedor 'db' de Postgres 18)
 SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://superset:superset_password@db:5432/superset'
 
 # Habilitar opciones de Redis para Celery (Workers)
@@ -28,15 +28,15 @@ class CeleryConfig:
 
 CELERY_CONFIG = CeleryConfig
 
-# ConfiguraciÃ³n de la CachÃ© de Datos Generales (Data Cache)
+# Configuracion de la Cache de Datos Generales (Data Cache)
 DATA_CACHE_CONFIG = {
     'CACHE_TYPE': 'RedisCache',
-    'CACHE_DEFAULT_TIMEOUT': 86400, # 1 dÃ­a de cachÃ© por defecto
+    'CACHE_DEFAULT_TIMEOUT': 86400, # 1 dia de cache por defecto
     'CACHE_KEY_PREFIX': 'superset_data_cache_',
     'CACHE_REDIS_URL': 'redis://redis:6379/1'
 }
 
-# ConfiguraciÃ³n de la CachÃ© de Componentes del Dashboard y Filtros
+# Configuracion de la Cache de Componentes del Dashboard y Filtros
 FILTER_STATE_CACHE_CONFIG = {
     'CACHE_TYPE': 'RedisCache',
     'CACHE_DEFAULT_TIMEOUT': 86400,
@@ -53,13 +53,13 @@ EXPLORE_FORM_DATA_CACHE_CONFIG = {
 
 # Feature Flags
 FEATURE_FLAGS = {
-    "DASHBOARD_CROSS_FILTERS": True,    # Permite a los grÃ¡ficos funcionar como filtros para el resto del dashboard
+    "DASHBOARD_CROSS_FILTERS": True,    # Permite a los graficos funcionar como filtros para el resto del dashboard
     "ENABLE_TEMPLATE_PROCESSING": True, # Permite el uso de Jinja en las consultas SQL Lab
     "DRILL_TO_DETAIL": True,
     "HORIZONTAL_FILTER_BAR": True,
 }
 
-# Configurar Timeouts mÃ¡s altos para consultas de inventario pesadas
+# Configurar Timeouts mas altos para consultas de inventario pesadas
 SQLLAB_TIMEOUT = 300 # Seteado a 5 minutos
 SUPERSET_WEBSERVER_TIMEOUT = 300
 

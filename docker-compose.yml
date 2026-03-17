@@ -6,7 +6,7 @@ x-superset-depends-on: &superset-depends-on
   - redis
 x-superset-volumes: &superset-volumes
   # Mount our custom config into the container
-  - ./superset_config.py:/app/pythonpath/superset_config.py
+  - ./config:/app/pythonpath
 
 services:
   redis:
@@ -46,6 +46,7 @@ services:
     container_name: superset_init
     command: >
       /bin/sh -c "
+      sleep 15 &&
       superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin &&
       superset db upgrade &&
       superset init
