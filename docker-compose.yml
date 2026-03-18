@@ -1,4 +1,7 @@
-x-superset-image: &superset-image apache/superset:latest-dev
+x-superset-image: &superset-image custom-superset-firebird:latest
+x-superset-build: &superset-build
+  context: .
+  dockerfile: Dockerfile
 x-superset-depends-on: &superset-depends-on
   db:
     condition: service_healthy
@@ -39,6 +42,7 @@ services:
 
   superset:
     image: *superset-image
+    build: *superset-build
     container_name: superset_app
     restart: unless-stopped
     ports:
@@ -51,6 +55,7 @@ services:
 
   superset-init:
     image: *superset-image
+    build: *superset-build
     container_name: superset_init
     command: >
       /bin/sh -c "
@@ -65,6 +70,7 @@ services:
 
   superset-worker:
     image: *superset-image
+    build: *superset-build
     container_name: superset_worker
     command: ["celery", "--app=superset.tasks.celery_app:app", "worker", "-O", "fair", "-l", "INFO"]
     restart: unless-stopped
@@ -75,6 +81,7 @@ services:
 
   superset-worker-beat:
     image: *superset-image
+    build: *superset-build
     container_name: superset_worker_beat
     command: ["celery", "--app=superset.tasks.celery_app:app", "beat"]
     restart: unless-stopped
