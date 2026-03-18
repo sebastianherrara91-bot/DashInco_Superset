@@ -1,7 +1,7 @@
 SELECT 
     Ano, Periodo, Fecha,
     (Periodo || SUBSTRING(Fecha FROM 1 FOR 2)) AS Fecha_AMD,
-    TRIM(Nit) AS Nit_Proveedor,
+    Nit AS Nit_Proveedor,
     PRO.Nombre AS Nombre_Proveedor,
     Cuenta,
     CTA.NOMBRE AS Nombre_Cuenta,
@@ -61,12 +61,12 @@ FROM (
         GROUP BY tr.Documento_Afecta, tr.Indice_Afecta, tr.Fecha_Afecta, tr.cuota_afecta, tr.codigo_proveedor, tr.cuenta
         HAVING ROUND(SUM(tr.valor * claseasiento(tr.asiento))) > 0
     ) estado
-    LEFT JOIN coma2019 cu ON cu.cuenta = estado.cuenta
-    LEFT JOIN cpma2019 pr ON pr.codigo = estado.codigo_proveedor
+    LEFT JOIN coma2026 cu ON cu.cuenta = estado.cuenta
+    LEFT JOIN cpma2026 pr ON pr.codigo = estado.codigo_proveedor
     LEFT JOIN cotrxxxx co ON co.fecha = estado.fecha_afecta AND co.ind_contabilidad = estado.indice_afecta
 ) BaseDatos
-LEFT JOIN CPMA2019 PRO ON BaseDatos.Proveedor = PRO.Codigo
-LEFT JOIN COMA2019 CTA ON BaseDatos.Cuenta = CTA.CUENTA
+LEFT JOIN CPMA2026 PRO ON BaseDatos.Proveedor = PRO.Codigo
+LEFT JOIN COMA2026 CTA ON BaseDatos.Cuenta = CTA.CUENTA
 LEFT JOIN cuentas_niif CTN ON CTA.cuenta_niif = CTN.cuenta 
 LEFT JOIN DOCUXXXX ON BaseDatos.TipodeDocumento = DOCUXXXX.TIPO
-LEFT JOIN CEMA2019 CCO ON BaseDatos.centroc = CCO.CODIGO;
+LEFT JOIN CEMA2026 CCO ON BaseDatos.centroc = CCO.CODIGO;
