@@ -8,8 +8,8 @@ RUN apt-get update -y && \
     apt-get install -y --no-install-recommends libfbclient2 firebird-dev && \
     rm -rf /var/lib/apt/lists/*
 
+# Descargar e instalar los "dialectos" y drivers compatibles con SQLAlchemy 1.4 de Superset
+RUN pip install --no-cache-dir "sqlalchemy-firebird~=0.7.0" fdb firebird-driver
+
 # Volver al usuario seguro de Superset
 USER superset
-
-# Descargar e instalar los "dialectos" y drivers de interconexión para Python/SQLAlchemy
-RUN pip install --no-cache-dir sqlalchemy-firebird fdb firebird-driver
